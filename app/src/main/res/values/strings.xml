@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Administracion Clientes</string>
+    <string name="nombre_empresa">Servicios Financieros Enlace</string>
+    <string name="nombres">"Nombres: "</string>
+    <string name="apellidos">"Apellidos: "</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="editar">Editar</string>
+    <string name="correo">Correo:</string>
+    <string name="telefono">Telefono:</string>
+    <string name="direccion">Direccion:</string>
+    <string name="nit">NIT:</string>
+    <string name="dui">DUI:</string>
+    <string name="submit">Agregar</string>
+    <string name="guardar">Guardar</string>
+    <string name="agregar">Agregar</string>
+</resources>

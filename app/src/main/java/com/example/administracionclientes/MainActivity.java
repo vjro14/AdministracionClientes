@@ -65,19 +65,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String s) {
                 DataBaseHelper dataBaseHelper = new DataBaseHelper(MainActivity.this);
-                lst.clear();
-                lst = dataBaseHelper.searchCliByName(s);
-                if (!lst.isEmpty()) {
-                    if (myAdapter != null) {
-                        myAdapter.notifyDataSetChanged();
-                    }
-                    myrv = (RecyclerView) findViewById(R.id.rvlistClient);
-                    myAdapter = new clientsAdapter(MainActivity.this, lst);
-                    myrv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                    myrv.setAdapter(myAdapter);
-                } else {
-                    Toast.makeText(MainActivity.this, "No se encontro el cliente", Toast.LENGTH_SHORT).show();
+                if (lst != null) {
+                    lst.clear();
                 }
+                if (!s.isEmpty()) {
+                    lst = dataBaseHelper.searchCliByName(s);
+                    if (lst != null) {
+                        if (myAdapter != null) {
+                            myAdapter.notifyDataSetChanged();
+                        }
+                        myrv = (RecyclerView) findViewById(R.id.rvlistClient);
+                        myAdapter = new clientsAdapter(MainActivity.this, lst);
+                        myrv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                        myrv.setAdapter(myAdapter);
+                    } else {
+                        Toast.makeText(MainActivity.this, "No se encontro el cliente", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Ingrese un nombre", Toast.LENGTH_SHORT).show();
+                }
+
                 return false;
             }
 

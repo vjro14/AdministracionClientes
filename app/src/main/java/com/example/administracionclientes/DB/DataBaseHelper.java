@@ -129,9 +129,31 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             String correo = cursor.getString(7);
             client = new Client(id, nombres, apellidos, dui, nit, direccion, telefono, correo);
         } else {
-
+            client = null;
         }
         return client;
+    }
+
+    public List<Client> searchCliByName(String cli) {
+        List<Client> clients = new ArrayList<>();
+        String query = "select * from " + TABLE_NAME + " where nombres like '%" + cli + "%'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(0);
+            String nombres = cursor.getString(1);
+            String apellidos = cursor.getString(2);
+            String dui = cursor.getString(3);
+            String nit = cursor.getString(4);
+            String direccion = cursor.getString(5);
+            String telefono = cursor.getString(6);
+            String correo = cursor.getString(7);
+            clients.add(new Client(id, nombres, apellidos, dui, nit, direccion, telefono, correo));
+        } else {
+            clients = null;
+        }
+        return clients;
     }
 
     public boolean deleteClient(int id) {

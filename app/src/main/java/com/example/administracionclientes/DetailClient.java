@@ -1,33 +1,21 @@
 package com.example.administracionclientes;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.example.administracionclientes.Clases.Client;
+import com.example.administracionclientes.DB.DataBaseHelper;
 
 public class DetailClient extends AppCompatActivity {
-
-    String datoRecibido, url, urlDel;
-    RequestQueue requestQueue;
+    int id;
     TextView nombre, apellido, dui, nit, direccion, telefono, correo;
     AlertDialog.Builder DialogBuilder;
 
@@ -41,9 +29,9 @@ public class DetailClient extends AppCompatActivity {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
         Bundle extra = getIntent().getExtras();
-        datoRecibido = extra.getString("id");
-        url = "https://apiclientes.000webhostapp.com/WebAPI/GetClients.php?id=" + datoRecibido;
-        urlDel = "https://apiclientes.000webhostapp.com/WebAPI/deleteClient.php";
+        if (extra != null) {
+            id = extra.getInt("id");
+        }
 
         nombre = findViewById(R.id.tv_nombres);
         apellido = findViewById(R.id.tv_apellidos);
@@ -52,7 +40,9 @@ public class DetailClient extends AppCompatActivity {
         direccion = findViewById(R.id.tv_direccion);
         telefono = findViewById(R.id.tv_telefono);
         correo = findViewById(R.id.tv_correo);
-        Get_Client();
+
+        getClient();
+
         DialogBuilder = new AlertDialog.Builder(DetailClient.this);
     }
 
@@ -60,93 +50,50 @@ public class DetailClient extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // handle arrow click here
         if (item.getItemId() == android.R.id.home) {
-            finish(); // close this activity and return to preview activity (if there is any)
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /////////////////////////////////volley///////////////////////////////
-    public void Get_Client() {
+    /////////////////////////////////db///////////////////////////////
 
-        requestQueue = Volley.newRequestQueue(this);
+    public void getClient() {
+        DataBaseHelper dataBaseHelper = new DataBaseHelper(DetailClient.this);
+        Client data = dataBaseHelper.searchCli(id);
+        if (data != null) {
+            nombre.setText(data.getNombres());
+            apellido.setText(data.getApellidos());
+            dui.setText(data.getDui());
+            nit.setText(data.getNit());
+            direccion.setText(data.getDireccion());
+            telefono.setText(data.getTelefono());
+            correo.setText(data.getCorreo());
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Error")
+                    .setMessage("Ocurrio un error, intente de nuevo")
 
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-
-                    JSONObject json = response.getJSONObject("cliente");
-
-                    nombre.setText(json.getString("Nombres"));
-                    apellido.setText(json.getString("Apellidos"));
-                    dui.setText(json.getString("DUI"));
-                    nit.setText(json.getString("NIT"));
-                    direccion.setText(json.getString("Direccion"));
-                    telefono.setText(json.getString("Telefono"));
-                    correo.setText(json.getString("Correo"));
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
-        requestQueue.add(request);
-
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(DetailClient.this, MainActivity.class);
+                            startActivity(intent);
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 
     public void delete() {
-        requestQueue = Volley.newRequestQueue(this);
-        StringRequest postRequest = new StringRequest(Request.Method.POST, urlDel,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // response
-
-                        DialogBuilder.setTitle("Eliminar");
-                        DialogBuilder.setMessage("Se ha eliminado con exito!");
-                        DialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(DetailClient.this, MainActivity.class);
-                                startActivity(intent);
-                            }
-                        });
-                        DialogBuilder.show();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        DialogBuilder.setTitle("Eliminar");
-                        DialogBuilder.setMessage("Ha ocurrido un error, por favor intente de nuevo");
-                        DialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                //Hacer cosas aqui al hacer clic en el boton de aceptar
-                            }
-                        });
-                        DialogBuilder.show();
-                    }
-                }
-        ) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("id", datoRecibido);
-
-                return params;
-            }
-        };
-        requestQueue.add(postRequest);
+        DataBaseHelper dataBaseHelper = new DataBaseHelper(DetailClient.this);
+        if (!dataBaseHelper.deleteClient(id)) {
+            Intent intent = new Intent(DetailClient.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        } else {
+            Toast.makeText(DetailClient.this, "Ocurrio un error, intente de nuevo", Toast.LENGTH_SHORT).show();
+        }
     }
 
     ///////////////////////////////////////////////////funciones
@@ -168,14 +115,7 @@ public class DetailClient extends AppCompatActivity {
 
     public void editClient(View v) {
         Intent intento = new Intent(DetailClient.this, EditClient.class);
-        intento.putExtra("id", datoRecibido);
-        intento.putExtra("nombre", nombre.getText().toString());
-        intento.putExtra("apellido", apellido.getText().toString());
-        intento.putExtra("dui", dui.getText().toString());
-        intento.putExtra("nit", nit.getText().toString());
-        intento.putExtra("direccion", direccion.getText().toString());
-        intento.putExtra("telefono", telefono.getText().toString());
-        intento.putExtra("correo", correo.getText().toString());
+        intento.putExtra("id", id);
         startActivity(intento);
     }
 }

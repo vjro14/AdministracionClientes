@@ -1,49 +1,41 @@
 package com.example.administracionclientes;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.example.administracionclientes.Clases.Client;
+import com.example.administracionclientes.DB.DataBaseHelper;
 
 public class EditClient extends AppCompatActivity {
 
-    String id, nombre, apellido, dui, nit, direccion, telefono, correo, url;
+    int id;
     EditText etnombre, etapellido, etdui, etnit, etdireccion, ettelefono, etcorreo;
     AlertDialog.Builder DialogBuilder;
-    RequestQueue requestQueue;
+    DataBaseHelper dataBaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_client);
+        // add back arrow to toolbar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
         Bundle extra = getIntent().getExtras();
-        url = "https://apiclientes.000webhostapp.com/WebAPI/EditClient.php";
         DialogBuilder = new AlertDialog.Builder(EditClient.this);
-        id = extra.getString("id");
-        nombre = extra.getString("nombre");
-        apellido = extra.getString("apellido");
-        dui = extra.getString("dui");
-        nit = extra.getString("nit");
-        direccion = extra.getString("direccion");
-        telefono = extra.getString("telefono");
-        correo = extra.getString("correo");
-
+        if (extra != null) {
+            id = extra.getInt("id");
+        }
+        dataBaseHelper = new DataBaseHelper(EditClient.this);
         etnombre = findViewById(R.id.et_nombres);
         etapellido = findViewById(R.id.et_apellidos);
         etdui = findViewById(R.id.et_dui);
@@ -52,68 +44,66 @@ public class EditClient extends AppCompatActivity {
         ettelefono = findViewById(R.id.et_telefono);
         etcorreo = findViewById(R.id.et_correo);
 
-        etnombre.setText(nombre);
-        etapellido.setText(apellido);
-        etdui.setText(dui);
-        etnit.setText(nit);
-        etdireccion.setText(direccion);
-        ettelefono.setText(telefono);
-        etcorreo.setText(correo);
+        getClient();
     }
 
-    ///////////////////////////volley////////////////////////////////////////////////////////////
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // handle arrow click here
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    ///////////////////////////db////////////////////////////////////////////////////////////
+    public void getClient() {
+
+        Client data = dataBaseHelper.searchCli(id);
+        if (data != null) {
+            etnombre.setText(data.getNombres());
+            etapellido.setText(data.getApellidos());
+            etdui.setText(data.getDui());
+            etnit.setText(data.getNit());
+            etdireccion.setText(data.getDireccion());
+            ettelefono.setText(data.getTelefono());
+            etcorreo.setText(data.getCorreo());
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Error")
+                    .setMessage("Ocurrio un error, intente de nuevo")
+
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(EditClient.this, MainActivity.class);
+                            startActivity(intent);
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+    }
+
     public void edit() {
-        requestQueue = Volley.newRequestQueue(this);
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // response
+        Client data = new Client(id, etnombre.getText().toString(), etapellido.getText().toString(), etdui.getText().toString(), etnit.getText().toString(),
+                etdireccion.getText().toString(), ettelefono.getText().toString(), etcorreo.getText().toString());
+        boolean result = dataBaseHelper.updateClient(data);
 
-                        DialogBuilder.setTitle("Editar");
-                        DialogBuilder.setMessage("Se ha editado con exito!");
-                        DialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(EditClient.this, MainActivity.class);
-                                startActivity(intent);
-                            }
-                        });
-                        DialogBuilder.show();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+        if (result) {
+            Intent intent = new Intent(EditClient.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Error")
+                    .setMessage("Ocurrio un error, intente de nuevo")
 
-                        DialogBuilder.setTitle("Editar");
-                        DialogBuilder.setMessage("Ha ocurrido un error, por favor intente de nuevo");
-                        DialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                    .setPositiveButton(android.R.string.yes, null)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
 
-                            }
-                        });
-                        DialogBuilder.show();
-                    }
-                }
-        ) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("id", id);
-                params.put("nombre", etnombre.getText().toString());
-                params.put("apellido", etapellido.getText().toString());
-                params.put("dui", etdui.getText().toString());
-                params.put("nit", etnit.getText().toString());
-                params.put("direccion", etdireccion.getText().toString());
-                params.put("telefono", ettelefono.getText().toString());
-                params.put("correo", etcorreo.getText().toString());
-
-                return params;
-            }
-        };
-        requestQueue.add(postRequest);
     }
 
     /////////////////////////////////////funciones////////////////////////////////////////////////

@@ -1,42 +1,26 @@
 package com.example.administracionclientes;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.administracionclientes.Adapters.clientsAdapter;
 import com.example.administracionclientes.Clases.Client;
+import com.example.administracionclientes.DB.DataBaseHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RequestQueue requestQueue;
     clientsAdapter myAdapter;
-    private String url, urlDel;
     List<Client> lst;
     RecyclerView myrv;
     FloatingActionButton btnAdd;
@@ -48,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         lst = new ArrayList<>();
-        url = "https://apiclientes.000webhostapp.com/WebAPI/GetClients.php";
         btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,47 +44,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    ////////////////////////////////////volley request////////////
+    ////////////////////////////////////db request////////////
     public void Get_All_clients() {
 
-        requestQueue = Volley.newRequestQueue(MainActivity.this);
+        DataBaseHelper dataBaseHelper = new DataBaseHelper(MainActivity.this);
+        lst = dataBaseHelper.getAll();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-
-                    JSONArray json = response.getJSONArray("clientes");
-                    lst.clear();
-                    for (int i = 0; i < json.length(); i++) {
-
-                        JSONObject jsonObject = json.getJSONObject(i);
-
-                        lst.add(new Client(Integer.parseInt(jsonObject.getString("id_cliente")), jsonObject.getString("Nombres"), jsonObject.getString("Apellidos"),
-                                jsonObject.getString("DUI"), jsonObject.getString("NIT"), jsonObject.getString("Direccion"), jsonObject.getString("Telefono"),
-                                jsonObject.getString("Correo")));
-                    }
-                    if (myAdapter != null) {
-                        myAdapter.notifyDataSetChanged();
-                    }
-                    myrv = (RecyclerView) findViewById(R.id.rvlistClient);
-                    myAdapter = new clientsAdapter(MainActivity.this, lst);
-                    myrv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                    myrv.setAdapter(myAdapter);
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+        if (!lst.isEmpty()) {
+            if (myAdapter != null) {
+                myAdapter.notifyDataSetChanged();
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, "No hay datos", Toast.LENGTH_LONG).show();
-            }
-        });
+            myrv = (RecyclerView) findViewById(R.id.rvlistClient);
+            myAdapter = new clientsAdapter(MainActivity.this, lst);
+            myrv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+            myrv.setAdapter(myAdapter);
+        } else {
+            Toast.makeText(MainActivity.this, "No hay Datos", Toast.LENGTH_SHORT).show();
+        }
 
-        requestQueue.add(request);
 
     }
 
@@ -110,8 +70,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void verDetalles(View v) {
         TextView id = v.findViewById(R.id.tv_id_client);
+        int id_cli = Integer.parseInt(id.getText().toString());
         Intent intent = new Intent(MainActivity.this, DetailClient.class);
-        intent.putExtra("id", id.getText().toString());
+        intent.putExtra("id", id_cli);
         startActivity(intent);
     }
 

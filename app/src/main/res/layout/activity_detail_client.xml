@@ -1,21 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="10"
     tools:context=".DetailClient">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="100dp"
+            android:layout_height="90dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/enlace"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_apellidos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:text=""
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.574"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.66" />
+
+        <TextView
+            android:id="@+id/tv_nombres"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:text=""
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.571"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.226" />
+
+        <ImageButton
+            android:id="@+id/btnDelete"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@color/Red"
+            android:onClick="deleteClient"
+            android:src="@drawable/ic_baseline_delete_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.955"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.155" />
+
+        <ImageButton
+            android:id="@+id/btnEdit"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@color/Green"
+            android:onClick="editClient"
+            android:src="@drawable/ic_baseline_edit_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.955"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.77" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.058">
+        android:layout_height="0dp"
+        android:layout_weight="8"
+        android:layout_margin="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,56 +100,14 @@
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/btnEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="7dp"
-                    android:background="@color/Green"
-                    android:onClick="editClient"
-                    android:text="@string/editar" />
-
-                <Button
-                    android:id="@+id/btnDelete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="7dp"
-                    android:background="@color/Red"
-                    android:onClick="deleteClient"
-                    android:text="@string/eliminar" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="7dp"
-                android:text="@string/nombres" />
-
-            <TextView
-                android:id="@+id/tv_nombres"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="7dp"
-                android:text="" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="7dp"
-                android:text="@string/apellidos" />
-
-            <TextView
-                android:id="@+id/tv_apellidos"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="7dp"
-                android:text="" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="7dp"
-                android:text="@string/dui" />
+                android:text="@string/dui"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_dui"
@@ -90,7 +120,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="7dp"
-                android:text="@string/nit" />
+                android:text="@string/nit"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_nit"
@@ -103,7 +134,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="7dp"
-                android:text="@string/direccion" />
+                android:text="@string/direccion"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_direccion"
@@ -116,7 +148,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="7dp"
-                android:text="@string/telefono" />
+                android:text="@string/telefono"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_telefono"
@@ -129,7 +162,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="7dp"
-                android:text="@string/correo" />
+                android:text="@string/correo"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_correo"
@@ -142,4 +176,4 @@
     </ScrollView>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

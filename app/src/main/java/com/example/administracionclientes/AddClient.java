@@ -1,38 +1,26 @@
 package com.example.administracionclientes;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.example.administracionclientes.Clases.Client;
+import com.example.administracionclientes.DB.DataBaseHelper;
 
 public class AddClient extends AppCompatActivity {
 
     EditText etnombre, etapellido, etdui, etnit, etdireccion, ettelefono, etcorreo;
     AlertDialog.Builder DialogBuilder;
-    RequestQueue requestQueue;
-    String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_client);
-
-        url = "https://apiclientes.000webhostapp.com/WebAPI/AddClient.php";
         DialogBuilder = new AlertDialog.Builder(AddClient.this);
 
         etnombre = findViewById(R.id.et_nombresAdd);
@@ -44,58 +32,25 @@ public class AddClient extends AppCompatActivity {
         etcorreo = findViewById(R.id.et_correoAdd);
     }
 
-    ///////////////////////////volley////////////////////////////////////////////////////////////
+    ///////////////////////////db////////////////////////////////////////////////////////////
+
     public void add() {
-        requestQueue = Volley.newRequestQueue(this);
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // response
+        Client cli = new Client(0, etnombre.getText().toString(), etapellido.getText().toString(), etdui.getText().toString(), etnit.getText().toString(),
+                etdireccion.getText().toString(), ettelefono.getText().toString(), etcorreo.getText().toString());
 
-                        DialogBuilder.setTitle("Agregar");
-                        DialogBuilder.setMessage("Se ha agregado con exito!");
-                        DialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(AddClient.this, MainActivity.class);
-                                startActivity(intent);
-                            }
-                        });
-                        DialogBuilder.show();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+        try {
 
-                        DialogBuilder.setTitle("Agregar");
-                        DialogBuilder.setMessage("Ha ocurrido un error, por favor intente de nuevo");
-                        DialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+            DataBaseHelper dataBaseHelper = new DataBaseHelper(AddClient.this);
+            boolean success = dataBaseHelper.addClient(cli);
 
-                            }
-                        });
-                        DialogBuilder.show();
-                    }
-                }
-        ) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("nombre", etnombre.getText().toString());
-                params.put("apellido", etapellido.getText().toString());
-                params.put("dui", etdui.getText().toString());
-                params.put("nit", etnit.getText().toString());
-                params.put("direccion", etdireccion.getText().toString());
-                params.put("telefono", ettelefono.getText().toString());
-                params.put("correo", etcorreo.getText().toString());
-
-                return params;
+            if (success) {
+                Intent intent = new Intent(AddClient.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
-        };
-        requestQueue.add(postRequest);
+        } catch (Exception e) {
+            Toast.makeText(AddClient.this, "Ocurrio un error, intente de nuevo", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /////////////////////////////////////funciones////////////////////////////////////////////////
